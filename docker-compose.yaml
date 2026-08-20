@@ -1,19 +1,41 @@
+version: '3.8'
+
 services:
   postgres:
-    image: postgres:18
+    image: postgres:16-alpine
     container_name: minilibrary-postgres
     restart: unless-stopped
-
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: librarypass333
       POSTGRES_DB: library
-
     ports:
       - "5432:5432"
-
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
+  elasticsearch_data:
+
+networks:
+  app-network:
+    driver: bridge

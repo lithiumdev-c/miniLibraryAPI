@@ -9,6 +9,7 @@ from app.models.book import Book
 from app.models.favorite import Favourite
 from app.models.user import User
 from app.schemas.book import BookCreateSchema, BookResponseSchema, BookUpdateSchema
+from app.search import BookSearch
 
 from pwdlib import PasswordHash
 from pwdlib.hashers.bcrypt import BcryptHasher
@@ -18,13 +19,15 @@ bcrypt_context = PasswordHash((BcryptHasher(),))
 
 class BookRepository:
     @classmethod
-    async def create_new_book(cls, payload: BookCreateSchema, db:AsyncSession, owner_id: int):
+    async def create_new_book(cls, payload: BookCreateSchema, db:AsyncSession, owner_id: int, search_service: BookSearch):
         book = Book(**payload.model_dump(), owner_id=owner_id)
 
         db.add(book)
 
         await db.commit()
         await db.refresh(book)
+
+        await search_service.index_book(book)
 
         return book
 
