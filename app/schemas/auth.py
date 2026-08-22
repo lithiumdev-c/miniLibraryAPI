@@ -6,7 +6,7 @@ class CreateUserSchema(BaseModel):
     password: str
     email: EmailStr
 
-    created_at: AwareDatetime | EmailStr
+    created_at: AwareDatetime
 
     model_config = ConfigDict(from_attributes=True)
 
